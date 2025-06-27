@@ -1,0 +1,1899 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天文数据登记系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        accent: '#722ED1',
+                        dark: '#1D2129',
+                        light: '#F2F3F5'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+
+            .bg-stars {
+                background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+                background-size: 50px 50px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-dark text-light font-inter min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-dark/80 backdrop-blur-md border-b border-gray-700 fixed w-full z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-star text-yellow-400 text-2xl"></i>
+                <h1 class="text-xl font-bold text-white">天文数据<span class="text-primary">登记系统</span></h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#home" class="text-gray-300 hover:text-white transition-colors">首页</a>
+                <a href="#data" class="text-gray-300 hover:text-white transition-colors">数据列表</a>
+                <a href="#add" class="text-gray-300 hover:text-white transition-colors">添加数据</a>
+                <a href="#about" class="text-gray-300 hover:text-white transition-colors">关于</a>
+            </div>
+            <button class="md:hidden text-white text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="pt-24 pb-16 bg-gradient-to-b from-dark to-dark/90 bg-stars relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-6 leading-tight">
+                    探索<span class="text-primary">宇宙奥秘</span>，记录<span class="text-secondary">天文数据</span>
+                </h2>
+                <p class="text-gray-400 text-lg mb-8">
+                    简单易用的天文数据登记系统，帮助你记录和管理观测到的天文现象和数据
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#add" class="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-primary/20">
+                        <i class="fa fa-plus-circle mr-2"></i>添加数据
+                    </a>
+                    <a href="#data" class="px-6 py-3 bg-dark border border-gray-700 hover:border-gray-500 text-white rounded-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fa fa-table mr-2"></i>查看数据
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 数据列表区域 -->
+    <section id="data" class="py-16 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">天文数据列表</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">查看和管理已登记的天文数据</p>
+            </div>
+
+            <div class="bg-dark/50 rounded-xl p-6 card-shadow border border-gray-800 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">已登记数据</h3>
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="搜索数据..." class="bg-gray-800 text-white border border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-64">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-full">
+                        <thead>
+                            <tr class="bg-gray-800/50 text-left">
+                                <th class="px-4 py-3 rounded-tl-lg">名称</th>
+                                <th class="px-4 py-3">类型</th>
+                                <th class="px-4 py-3">赤经</th>
+                                <th class="px-4 py-3">赤纬</th>
+                                <th class="px-4 py-3">星等</th>
+                                <th class="px-4 py-3">发现日期</th>
+                                <th class="px-4 py-3 rounded-tr-lg">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- 数据将通过JavaScript动态填充 -->
+                            <tr class="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                                <td class="px-4 py-3">仙女座星系</td>
+                                <td class="px-4 py-3">星系</td>
+                                <td class="px-4 py-3">00h 42m 44.3s</td>
+                                <td class="px-4 py-3">+41° 16′ 9″</td>
+                                <td class="px-4 py-3">3.4</td>
+                                <td class="px-4 py-3">964年</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="text-red-500 hover:text-red-600 transition-colors" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                                <td class="px-4 py-3">昴宿星团</td>
+                                <td class="px-4 py-3">星团</td>
+                                <td class="px-4 py-3">03h 47m 24s</td>
+                                <td class="px-4 py-3">+24° 07′ 00″</td>
+                                <td class="px-4 py-3">1.6</td>
+                                <td class="px-4 py-3">史前</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="text-red-500 hover:text-red-600 transition-colors" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="empty-data" class="hidden py-12 text-center">
+                    <i class="fa fa-database text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-500">暂无数据，请添加新数据</p>
+                </div>
+
+                <div class="flex justify-between items-center mt-6">
+                    <div class="text-sm text-gray-500">
+                        显示 <span id="showing-count">2</span> 条数据
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <button class="px-3 py-1 bg-primary text-white rounded transition-colors">1</button>
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors">2</button>
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 添加数据区域 -->
+    <section id="add" class="py-16 bg-gradient-to-b from-gray-900 to-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">添加天文数据</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">填写以下表单来添加新的天文数据记录</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-dark/50 rounded-xl p-6 card-shadow border border-gray-800">
+                    <form id="data-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-300 mb-1">天体名称 <span class="text-red-500">*</span></label>
+                                <input type="text" id="name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            </div>
+                            <div>
+                                <label for="type" class="block text-sm font-medium text-gray-300 mb-1">天体类型 <span class="text-red-500">*</span></label>
+                                <select id="type" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                                    <option value="">请选择...</option>
+                                    <option value="star">恒星</option>
+                                    <option value="planet">行星</option>
+                                    <option value="galaxy">星系</option>
+                                    <option value="nebula">星云</option>
+                                    <option value="cluster">星团</option>
+                                    <option value="comet">彗星</option>
+                                    <option value="asteroid">小行星</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="right-ascension" class="block text-sm font-medium text-gray-300 mb-1">赤经 <span class="text-red-500">*</span></label>
+                                <input type="text" id="right-ascension" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="例如: 03h 47m 24s" required>
+                            </div>
+                            <div>
+                                <label for="declination" class="block text-sm font-medium text-gray-300 mb-1">赤纬 <span class="text-red-500">*</span></label>
+                                <input type="text" id="declination" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="例如: +24° 07′ 00″" required>
+                            </div>
+                            <div>
+                                <label for="magnitude" class="block text-sm font-medium text-gray-300 mb-1">视星等 <span class="text-red-500">*</span></label>
+                                <input type="number" id="magnitude" step="0.1" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            </div>
+                            <div>
+                                <label for="discovery-date" class="block text-sm font-medium text-gray-300 mb-1">发现日期</label>
+                                <input type="date" id="discovery-date" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-300 mb-1">详细描述</label>
+                            <textarea id="description" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                        </div>
+
+                        <div class="pt-4 flex justify-end space-x-4">
+                            <button type="reset" class="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                                重置
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+                                <i class="fa fa-save mr-2"></i>保存数据
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于区域 -->
+    <section id="about" class="py-16 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">关于本系统</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">了解更多关于天文数据登记系统的信息</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-rocket text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">简单易用</h3>
+                    <p class="text-gray-400">直观的用户界面，让你可以轻松添加、查看和管理天文数据，无需复杂操作。</p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-secondary/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-database text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">数据管理</h3>
+                    <p class="text-gray-400">高效的数据存储和检索功能，帮助你组织和整理观测到的各种天文数据。</p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-line-chart text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">数据分析</h3>
+                    <p class="text-gray-400">未来将支持数据可视化和分析功能，帮助你发现更多天文现象背后的规律。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa fa-star text-yellow-400 text-xl"></i>
+                        <span class="text-lg font-bold text-white">天文数据登记系统</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">探索宇宙，记录奇迹</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-envelope text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-500 text-sm">
+                <p>© 2025 天文数据登记系统 | 由一位热心的大一学生开发</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-900 rounded-xl p-6 max-w-md w-full mx-4 card-shadow border border-gray-800 transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modal-title">操作确认</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-6" id="modal-message">
+                你确定要删除这条数据吗？
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button id="modal-cancel" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    取消
+                </button>
+                <button id="modal-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                    确认
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('py-2');
+                nav.classList.remove('py-3');
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.add('py-3');
+                nav.classList.remove('py-2');
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 数据管理
+        let astronomyData = [
+            {
+                id: 1,
+                name: "仙女座星系",
+                type: "星系",
+                rightAscension: "00h 42m 44.3s",
+                declination: "+41° 16′ 9″",
+                magnitude: 3.4,
+                discoveryDate: "964年",
+                description: "仙女座星系（M31）是离我们银河系最近的大星系，也是肉眼可见的最远天体之一。"
+            },
+            {
+                id: 2,
+                name: "昴宿星团",
+                type: "星团",
+                rightAscension: "03h 47m 24s",
+                declination: "+24° 07′ 00″",
+                magnitude: 1.6,
+                discoveryDate: "史前",
+                description: "昴宿星团（M45），又称七姊妹星团，是一个位于金牛座的疏散星团，非常明亮且易于观测。"
+            }
+        ];
+
+        // 模态框控制
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+        let currentAction = null;
+        let currentDataId = null;
+
+        function openModal(title, message, action, dataId = null) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            currentAction = action;
+            currentDataId = dataId;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        closeModal.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalConfirm.addEventListener('click', () => {
+            if (currentAction === 'delete') {
+                deleteData(currentDataId);
+            }
+            closeModal();
+        });
+
+        // 渲染数据表格
+        function renderDataTable() {
+            const tableBody = document.getElementById('data-table-body');
+            const emptyData = document.getElementById('empty-data');
+            const showingCount = document.getElementById('showing-count');
+
+            if (astronomyData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyData.classList.remove('hidden');
+                showingCount.textContent = '0';
+                return;
+            }
+
+            emptyData.classList.add('hidden');
+            showingCount.textContent = astronomyData.length;
+
+            tableBody.innerHTML = '';
+            astronomyData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/30 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${item.name}</td>
+                    <td class="px-4 py-3">${item.type}</td>
+                    <td class="px-4 py-3">${item.rightAscension}</td>
+                    <td class="px-4 py-3">${item.declination}</td>
+                    <td class="px-4 py-3">${item.magnitude}</td>
+                    <td class="px-4 py-3">${item.discoveryDate || '未知'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑" onclick="editData(${item.id})">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" title="删除" onclick="openModal('删除数据', '你确定要删除 ${item.name} 的数据吗？', 'delete', ${item.id})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 添加新数据
+        const dataForm = document.getElementById('data-form');
+        dataForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const type = document.getElementById('type').value;
+            const rightAscension = document.getElementById('right-ascension').value;
+            const declination = document.getElementById('declination').value;
+            const magnitude = parseFloat(document.getElementById('magnitude').value);
+            const discoveryDate = document.getElementById('discovery-date').value;
+            const description = document.getElementById('description').value;
+
+            const newData = {
+                id: Date.now(),
+                name,
+                type,
+                rightAscension,
+                declination,
+                magnitude,
+                discoveryDate,
+                description
+            };
+
+            astronomyData.push(newData);
+            renderDataTable();
+
+            // 重置表单
+            dataForm.reset();
+
+            // 显示成功消息
+            showNotification('数据添加成功！', 'success');
+        });
+
+        // 编辑数据
+        function editData(id) {
+            const data = astronomyData.find(item => item.id === id);
+            if (!data) return;
+
+            document.getElementById('name').value = data.name;
+            document.getElementById('type').value = data.type;
+            document.getElementById('right-ascension').value = data.rightAscension;
+            document.getElementById('declination').value = data.declination;
+            document.getElementById('magnitude').value = data.magnitude;
+            document.getElementById('discovery-date').value = data.discoveryDate || '';
+            document.getElementById('description').value = data.description || '';
+
+            // 滚动到表单
+            document.getElementById('add').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 删除数据
+        function deleteData(id) {
+            astronomyData = astronomyData.filter(item => item.id !== id);
+            renderDataTable();
+            showNotification('数据已删除！', 'error');
+        }
+
+        // 搜索功能
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+
+            if (!searchTerm) {
+                renderDataTable();
+                return;
+            }
+
+            const filteredData = astronomyData.filter(item => {
+                return item.name.toLowerCase().includes(searchTerm) ||
+                       item.type.toLowerCase().includes(searchTerm) ||
+                       item.rightAscension.toLowerCase().includes(searchTerm) ||
+                       item.declination.toLowerCase().includes(searchTerm);
+            });
+
+            const tableBody = document.getElementById('data-table-body');
+            const emptyData = document.getElementById('empty-data');
+            const showingCount = document.getElementById('showing-count');
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyData.classList.remove('hidden');
+                showingCount.textContent = '0';
+                return;
+            }
+
+            emptyData.classList.add('hidden');
+            showingCount.textContent = filteredData.length;
+
+            tableBody.innerHTML = '';
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/30 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${item.name}</td>
+                    <td class="px-4 py-3">${item.type}</td>
+                    <td class="px-4 py-3">${item.rightAscension}</td>
+                    <td class="px-4 py-3">${item.declination}</td>
+                    <td class="px-4 py-3">${item.magnitude}</td>
+                    <td class="px-4 py-3">${item.discoveryDate || '未知'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑" onclick="editData(${item.id})">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" title="删除" onclick="openModal('删除数据', '你确定要删除 ${item.name} 的数据吗？', 'delete', ${item.id})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        });
+
+        // 通知功能
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out translate-x-full z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-primary text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fa ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        'fa-info-circle'
+                    } mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            // 添加到页面
+            document.body.appendChild(notification);
+
+            // 显示通知
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 10);
+
+            // 自动关闭
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDataTable();
+        });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天文数据登记系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        accent: '#722ED1',
+                        dark: '#1D2129',
+                        light: '#F2F3F5'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+
+            .bg-stars {
+                background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+                background-size: 50px 50px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-dark text-light font-inter min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-dark/80 backdrop-blur-md border-b border-gray-700 fixed w-full z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-star text-yellow-400 text-2xl"></i>
+                <h1 class="text-xl font-bold text-white">天文数据<span class="text-primary">登记系统</span></h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#home" class="text-gray-300 hover:text-white transition-colors">首页</a>
+                <a href="#data" class="text-gray-300 hover:text-white transition-colors">数据列表</a>
+                <a href="#add" class="text-gray-300 hover:text-white transition-colors">添加数据</a>
+                <a href="#about" class="text-gray-300 hover:text-white transition-colors">关于</a>
+            </div>
+            <button class="md:hidden text-white text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="pt-24 pb-16 bg-gradient-to-b from-dark to-dark/90 bg-stars relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-6 leading-tight">
+                    探索<span class="text-primary">宇宙奥秘</span>，记录<span class="text-secondary">天文数据</span>
+                </h2>
+                <p class="text-gray-400 text-lg mb-8">
+                    简单易用的天文数据登记系统，帮助你记录和管理观测到的天文现象和数据
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#add" class="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-primary/20">
+                        <i class="fa fa-plus-circle mr-2"></i>添加数据
+                    </a>
+                    <a href="#data" class="px-6 py-3 bg-dark border border-gray-700 hover:border-gray-500 text-white rounded-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fa fa-table mr-2"></i>查看数据
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 数据列表区域 -->
+    <section id="data" class="py-16 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">天文数据列表</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">查看和管理已登记的天文数据</p>
+            </div>
+
+            <div class="bg-dark/50 rounded-xl p-6 card-shadow border border-gray-800 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">已登记数据</h3>
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="搜索数据..." class="bg-gray-800 text-white border border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-64">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-full">
+                        <thead>
+                            <tr class="bg-gray-800/50 text-left">
+                                <th class="px-4 py-3 rounded-tl-lg">名称</th>
+                                <th class="px-4 py-3">类型</th>
+                                <th class="px-4 py-3">赤经</th>
+                                <th class="px-4 py-3">赤纬</th>
+                                <th class="px-4 py-3">星等</th>
+                                <th class="px-4 py-3">发现日期</th>
+                                <th class="px-4 py-3 rounded-tr-lg">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- 数据将通过JavaScript动态填充 -->
+                            <tr class="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                                <td class="px-4 py-3">仙女座星系</td>
+                                <td class="px-4 py-3">星系</td>
+                                <td class="px-4 py-3">00h 42m 44.3s</td>
+                                <td class="px-4 py-3">+41° 16′ 9″</td>
+                                <td class="px-4 py-3">3.4</td>
+                                <td class="px-4 py-3">964年</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="text-red-500 hover:text-red-600 transition-colors" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                                <td class="px-4 py-3">昴宿星团</td>
+                                <td class="px-4 py-3">星团</td>
+                                <td class="px-4 py-3">03h 47m 24s</td>
+                                <td class="px-4 py-3">+24° 07′ 00″</td>
+                                <td class="px-4 py-3">1.6</td>
+                                <td class="px-4 py-3">史前</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="text-red-500 hover:text-red-600 transition-colors" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="empty-data" class="hidden py-12 text-center">
+                    <i class="fa fa-database text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-500">暂无数据，请添加新数据</p>
+                </div>
+
+                <div class="flex justify-between items-center mt-6">
+                    <div class="text-sm text-gray-500">
+                        显示 <span id="showing-count">2</span> 条数据
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <button class="px-3 py-1 bg-primary text-white rounded transition-colors">1</button>
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors">2</button>
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 添加数据区域 -->
+    <section id="add" class="py-16 bg-gradient-to-b from-gray-900 to-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">添加天文数据</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">填写以下表单来添加新的天文数据记录</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-dark/50 rounded-xl p-6 card-shadow border border-gray-800">
+                    <form id="data-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-300 mb-1">天体名称 <span class="text-red-500">*</span></label>
+                                <input type="text" id="name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            </div>
+                            <div>
+                                <label for="type" class="block text-sm font-medium text-gray-300 mb-1">天体类型 <span class="text-red-500">*</span></label>
+                                <select id="type" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                                    <option value="">请选择...</option>
+                                    <option value="star">恒星</option>
+                                    <option value="planet">行星</option>
+                                    <option value="galaxy">星系</option>
+                                    <option value="nebula">星云</option>
+                                    <option value="cluster">星团</option>
+                                    <option value="comet">彗星</option>
+                                    <option value="asteroid">小行星</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="right-ascension" class="block text-sm font-medium text-gray-300 mb-1">赤经 <span class="text-red-500">*</span></label>
+                                <input type="text" id="right-ascension" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="例如: 03h 47m 24s" required>
+                            </div>
+                            <div>
+                                <label for="declination" class="block text-sm font-medium text-gray-300 mb-1">赤纬 <span class="text-red-500">*</span></label>
+                                <input type="text" id="declination" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="例如: +24° 07′ 00″" required>
+                            </div>
+                            <div>
+                                <label for="magnitude" class="block text-sm font-medium text-gray-300 mb-1">视星等 <span class="text-red-500">*</span></label>
+                                <input type="number" id="magnitude" step="0.1" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            </div>
+                            <div>
+                                <label for="discovery-date" class="block text-sm font-medium text-gray-300 mb-1">发现日期</label>
+                                <input type="date" id="discovery-date" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-300 mb-1">详细描述</label>
+                            <textarea id="description" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                        </div>
+
+                        <div class="pt-4 flex justify-end space-x-4">
+                            <button type="reset" class="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                                重置
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+                                <i class="fa fa-save mr-2"></i>保存数据
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于区域 -->
+    <section id="about" class="py-16 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">关于本系统</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">了解更多关于天文数据登记系统的信息</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-rocket text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">简单易用</h3>
+                    <p class="text-gray-400">直观的用户界面，让你可以轻松添加、查看和管理天文数据，无需复杂操作。</p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-secondary/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-database text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">数据管理</h3>
+                    <p class="text-gray-400">高效的数据存储和检索功能，帮助你组织和整理观测到的各种天文数据。</p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-line-chart text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">数据分析</h3>
+                    <p class="text-gray-400">未来将支持数据可视化和分析功能，帮助你发现更多天文现象背后的规律。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa fa-star text-yellow-400 text-xl"></i>
+                        <span class="text-lg font-bold text-white">天文数据登记系统</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">探索宇宙，记录奇迹</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-envelope text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-500 text-sm">
+                <p>© 2025 天文数据登记系统 | 由一位热心的大一学生开发</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-900 rounded-xl p-6 max-w-md w-full mx-4 card-shadow border border-gray-800 transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modal-title">操作确认</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-6" id="modal-message">
+                你确定要删除这条数据吗？
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button id="modal-cancel" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    取消
+                </button>
+                <button id="modal-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                    确认
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('py-2');
+                nav.classList.remove('py-3');
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.add('py-3');
+                nav.classList.remove('py-2');
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 数据管理
+        let astronomyData = [
+            {
+                id: 1,
+                name: "仙女座星系",
+                type: "星系",
+                rightAscension: "00h 42m 44.3s",
+                declination: "+41° 16′ 9″",
+                magnitude: 3.4,
+                discoveryDate: "964年",
+                description: "仙女座星系（M31）是离我们银河系最近的大星系，也是肉眼可见的最远天体之一。"
+            },
+            {
+                id: 2,
+                name: "昴宿星团",
+                type: "星团",
+                rightAscension: "03h 47m 24s",
+                declination: "+24° 07′ 00″",
+                magnitude: 1.6,
+                discoveryDate: "史前",
+                description: "昴宿星团（M45），又称七姊妹星团，是一个位于金牛座的疏散星团，非常明亮且易于观测。"
+            }
+        ];
+
+        // 模态框控制
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+        let currentAction = null;
+        let currentDataId = null;
+
+        function openModal(title, message, action, dataId = null) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            currentAction = action;
+            currentDataId = dataId;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        closeModal.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalConfirm.addEventListener('click', () => {
+            if (currentAction === 'delete') {
+                deleteData(currentDataId);
+            }
+            closeModal();
+        });
+
+        // 渲染数据表格
+        function renderDataTable() {
+            const tableBody = document.getElementById('data-table-body');
+            const emptyData = document.getElementById('empty-data');
+            const showingCount = document.getElementById('showing-count');
+
+            if (astronomyData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyData.classList.remove('hidden');
+                showingCount.textContent = '0';
+                return;
+            }
+
+            emptyData.classList.add('hidden');
+            showingCount.textContent = astronomyData.length;
+
+            tableBody.innerHTML = '';
+            astronomyData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/30 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${item.name}</td>
+                    <td class="px-4 py-3">${item.type}</td>
+                    <td class="px-4 py-3">${item.rightAscension}</td>
+                    <td class="px-4 py-3">${item.declination}</td>
+                    <td class="px-4 py-3">${item.magnitude}</td>
+                    <td class="px-4 py-3">${item.discoveryDate || '未知'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑" onclick="editData(${item.id})">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" title="删除" onclick="openModal('删除数据', '你确定要删除 ${item.name} 的数据吗？', 'delete', ${item.id})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 添加新数据
+        const dataForm = document.getElementById('data-form');
+        dataForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const type = document.getElementById('type').value;
+            const rightAscension = document.getElementById('right-ascension').value;
+            const declination = document.getElementById('declination').value;
+            const magnitude = parseFloat(document.getElementById('magnitude').value);
+            const discoveryDate = document.getElementById('discovery-date').value;
+            const description = document.getElementById('description').value;
+
+            const newData = {
+                id: Date.now(),
+                name,
+                type,
+                rightAscension,
+                declination,
+                magnitude,
+                discoveryDate,
+                description
+            };
+
+            astronomyData.push(newData);
+            renderDataTable();
+
+            // 重置表单
+            dataForm.reset();
+
+            // 显示成功消息
+            showNotification('数据添加成功！', 'success');
+        });
+
+        // 编辑数据
+        function editData(id) {
+            const data = astronomyData.find(item => item.id === id);
+            if (!data) return;
+
+            document.getElementById('name').value = data.name;
+            document.getElementById('type').value = data.type;
+            document.getElementById('right-ascension').value = data.rightAscension;
+            document.getElementById('declination').value = data.declination;
+            document.getElementById('magnitude').value = data.magnitude;
+            document.getElementById('discovery-date').value = data.discoveryDate || '';
+            document.getElementById('description').value = data.description || '';
+
+            // 滚动到表单
+            document.getElementById('add').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 删除数据
+        function deleteData(id) {
+            astronomyData = astronomyData.filter(item => item.id !== id);
+            renderDataTable();
+            showNotification('数据已删除！', 'error');
+        }
+
+        // 搜索功能
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+
+            if (!searchTerm) {
+                renderDataTable();
+                return;
+            }
+
+            const filteredData = astronomyData.filter(item => {
+                return item.name.toLowerCase().includes(searchTerm) ||
+                       item.type.toLowerCase().includes(searchTerm) ||
+                       item.rightAscension.toLowerCase().includes(searchTerm) ||
+                       item.declination.toLowerCase().includes(searchTerm);
+            });
+
+            const tableBody = document.getElementById('data-table-body');
+            const emptyData = document.getElementById('empty-data');
+            const showingCount = document.getElementById('showing-count');
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyData.classList.remove('hidden');
+                showingCount.textContent = '0';
+                return;
+            }
+
+            emptyData.classList.add('hidden');
+            showingCount.textContent = filteredData.length;
+
+            tableBody.innerHTML = '';
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/30 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${item.name}</td>
+                    <td class="px-4 py-3">${item.type}</td>
+                    <td class="px-4 py-3">${item.rightAscension}</td>
+                    <td class="px-4 py-3">${item.declination}</td>
+                    <td class="px-4 py-3">${item.magnitude}</td>
+                    <td class="px-4 py-3">${item.discoveryDate || '未知'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑" onclick="editData(${item.id})">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" title="删除" onclick="openModal('删除数据', '你确定要删除 ${item.name} 的数据吗？', 'delete', ${item.id})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        });
+
+        // 通知功能
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out translate-x-full z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-primary text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fa ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        'fa-info-circle'
+                    } mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            // 添加到页面
+            document.body.appendChild(notification);
+
+            // 显示通知
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 10);
+
+            // 自动关闭
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDataTable();
+        });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天文数据登记系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        accent: '#722ED1',
+                        dark: '#1D2129',
+                        light: '#F2F3F5'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+
+            .card-shadow {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+
+            .bg-stars {
+                background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+                background-size: 50px 50px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-dark text-light font-inter min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <nav class="bg-dark/80 backdrop-blur-md border-b border-gray-700 fixed w-full z-50 transition-all duration-300">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-star text-yellow-400 text-2xl"></i>
+                <h1 class="text-xl font-bold text-white">天文数据<span class="text-primary">登记系统</span></h1>
+            </div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#home" class="text-gray-300 hover:text-white transition-colors">首页</a>
+                <a href="#data" class="text-gray-300 hover:text-white transition-colors">数据列表</a>
+                <a href="#add" class="text-gray-300 hover:text-white transition-colors">添加数据</a>
+                <a href="#about" class="text-gray-300 hover:text-white transition-colors">关于</a>
+            </div>
+            <button class="md:hidden text-white text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <section id="home" class="pt-24 pb-16 bg-gradient-to-b from-dark to-dark/90 bg-stars relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-6 leading-tight">
+                    探索<span class="text-primary">宇宙奥秘</span>，记录<span class="text-secondary">天文数据</span>
+                </h2>
+                <p class="text-gray-400 text-lg mb-8">
+                    简单易用的天文数据登记系统，帮助你记录和管理观测到的天文现象和数据
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#add" class="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-primary/20">
+                        <i class="fa fa-plus-circle mr-2"></i>添加数据
+                    </a>
+                    <a href="#data" class="px-6 py-3 bg-dark border border-gray-700 hover:border-gray-500 text-white rounded-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fa fa-table mr-2"></i>查看数据
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 数据列表区域 -->
+    <section id="data" class="py-16 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">天文数据列表</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">查看和管理已登记的天文数据</p>
+            </div>
+
+            <div class="bg-dark/50 rounded-xl p-6 card-shadow border border-gray-800 mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">已登记数据</h3>
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="搜索数据..." class="bg-gray-800 text-white border border-gray-700 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-primary/50 w-full md:w-64">
+                        <i class="fa fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-full">
+                        <thead>
+                            <tr class="bg-gray-800/50 text-left">
+                                <th class="px-4 py-3 rounded-tl-lg">名称</th>
+                                <th class="px-4 py-3">类型</th>
+                                <th class="px-4 py-3">赤经</th>
+                                <th class="px-4 py-3">赤纬</th>
+                                <th class="px-4 py-3">星等</th>
+                                <th class="px-4 py-3">发现日期</th>
+                                <th class="px-4 py-3 rounded-tr-lg">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- 数据将通过JavaScript动态填充 -->
+                            <tr class="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                                <td class="px-4 py-3">仙女座星系</td>
+                                <td class="px-4 py-3">星系</td>
+                                <td class="px-4 py-3">00h 42m 44.3s</td>
+                                <td class="px-4 py-3">+41° 16′ 9″</td>
+                                <td class="px-4 py-3">3.4</td>
+                                <td class="px-4 py-3">964年</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="text-red-500 hover:text-red-600 transition-colors" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-gray-800/30 transition-colors">
+                                <td class="px-4 py-3">昴宿星团</td>
+                                <td class="px-4 py-3">星团</td>
+                                <td class="px-4 py-3">03h 47m 24s</td>
+                                <td class="px-4 py-3">+24° 07′ 00″</td>
+                                <td class="px-4 py-3">1.6</td>
+                                <td class="px-4 py-3">史前</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex space-x-2">
+                                        <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="text-red-500 hover:text-red-600 transition-colors" title="删除">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="empty-data" class="hidden py-12 text-center">
+                    <i class="fa fa-database text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-500">暂无数据，请添加新数据</p>
+                </div>
+
+                <div class="flex justify-between items-center mt-6">
+                    <div class="text-sm text-gray-500">
+                        显示 <span id="showing-count">2</span> 条数据
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fa fa-chevron-left"></i>
+                        </button>
+                        <button class="px-3 py-1 bg-primary text-white rounded transition-colors">1</button>
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors">2</button>
+                        <button class="px-3 py-1 bg-gray-800 hover:bg-gray-700 rounded transition-colors">
+                            <i class="fa fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 添加数据区域 -->
+    <section id="add" class="py-16 bg-gradient-to-b from-gray-900 to-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">添加天文数据</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">填写以下表单来添加新的天文数据记录</p>
+            </div>
+
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-dark/50 rounded-xl p-6 card-shadow border border-gray-800">
+                    <form id="data-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-300 mb-1">天体名称 <span class="text-red-500">*</span></label>
+                                <input type="text" id="name" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            </div>
+                            <div>
+                                <label for="type" class="block text-sm font-medium text-gray-300 mb-1">天体类型 <span class="text-red-500">*</span></label>
+                                <select id="type" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                                    <option value="">请选择...</option>
+                                    <option value="star">恒星</option>
+                                    <option value="planet">行星</option>
+                                    <option value="galaxy">星系</option>
+                                    <option value="nebula">星云</option>
+                                    <option value="cluster">星团</option>
+                                    <option value="comet">彗星</option>
+                                    <option value="asteroid">小行星</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="right-ascension" class="block text-sm font-medium text-gray-300 mb-1">赤经 <span class="text-red-500">*</span></label>
+                                <input type="text" id="right-ascension" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="例如: 03h 47m 24s" required>
+                            </div>
+                            <div>
+                                <label for="declination" class="block text-sm font-medium text-gray-300 mb-1">赤纬 <span class="text-red-500">*</span></label>
+                                <input type="text" id="declination" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="例如: +24° 07′ 00″" required>
+                            </div>
+                            <div>
+                                <label for="magnitude" class="block text-sm font-medium text-gray-300 mb-1">视星等 <span class="text-red-500">*</span></label>
+                                <input type="number" id="magnitude" step="0.1" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                            </div>
+                            <div>
+                                <label for="discovery-date" class="block text-sm font-medium text-gray-300 mb-1">发现日期</label>
+                                <input type="date" id="discovery-date" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-300 mb-1">详细描述</label>
+                            <textarea id="description" rows="4" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"></textarea>
+                        </div>
+
+                        <div class="pt-4 flex justify-end space-x-4">
+                            <button type="reset" class="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                                重置
+                            </button>
+                            <button type="submit" class="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+                                <i class="fa fa-save mr-2"></i>保存数据
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于区域 -->
+    <section id="about" class="py-16 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-3">关于本系统</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">了解更多关于天文数据登记系统的信息</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-rocket text-primary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">简单易用</h3>
+                    <p class="text-gray-400">直观的用户界面，让你可以轻松添加、查看和管理天文数据，无需复杂操作。</p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-secondary/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-database text-secondary text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">数据管理</h3>
+                    <p class="text-gray-400">高效的数据存储和检索功能，帮助你组织和整理观测到的各种天文数据。</p>
+                </div>
+
+                <div class="bg-gray-900/50 rounded-xl p-6 card-shadow border border-gray-800 hover:transform hover:scale-105 transition-all duration-300">
+                    <div class="w-14 h-14 bg-accent/20 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-line-chart text-accent text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">数据分析</h3>
+                    <p class="text-gray-400">未来将支持数据可视化和分析功能，帮助你发现更多天文现象背后的规律。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 border-t border-gray-800 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa fa-star text-yellow-400 text-xl"></i>
+                        <span class="text-lg font-bold text-white">天文数据登记系统</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">探索宇宙，记录奇迹</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fa fa-envelope text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-6 pt-6 text-center text-gray-500 text-sm">
+                <p>© 2025 天文数据登记系统 | 由一位热心的大一学生开发</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-900 rounded-xl p-6 max-w-md w-full mx-4 card-shadow border border-gray-800 transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modal-title">操作确认</h3>
+                <button id="close-modal" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="mb-6" id="modal-message">
+                你确定要删除这条数据吗？
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button id="modal-cancel" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors">
+                    取消
+                </button>
+                <button id="modal-confirm" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors">
+                    确认
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('py-2');
+                nav.classList.remove('py-3');
+                nav.classList.add('shadow-lg');
+            } else {
+                nav.classList.add('py-3');
+                nav.classList.remove('py-2');
+                nav.classList.remove('shadow-lg');
+            }
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 数据管理
+        let astronomyData = [
+            {
+                id: 1,
+                name: "仙女座星系",
+                type: "星系",
+                rightAscension: "00h 42m 44.3s",
+                declination: "+41° 16′ 9″",
+                magnitude: 3.4,
+                discoveryDate: "964年",
+                description: "仙女座星系（M31）是离我们银河系最近的大星系，也是肉眼可见的最远天体之一。"
+            },
+            {
+                id: 2,
+                name: "昴宿星团",
+                type: "星团",
+                rightAscension: "03h 47m 24s",
+                declination: "+24° 07′ 00″",
+                magnitude: 1.6,
+                discoveryDate: "史前",
+                description: "昴宿星团（M45），又称七姊妹星团，是一个位于金牛座的疏散星团，非常明亮且易于观测。"
+            }
+        ];
+
+        // 模态框控制
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const closeModal = document.getElementById('close-modal');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+        let currentAction = null;
+        let currentDataId = null;
+
+        function openModal(title, message, action, dataId = null) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            currentAction = action;
+            currentDataId = dataId;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        closeModal.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalConfirm.addEventListener('click', () => {
+            if (currentAction === 'delete') {
+                deleteData(currentDataId);
+            }
+            closeModal();
+        });
+
+        // 渲染数据表格
+        function renderDataTable() {
+            const tableBody = document.getElementById('data-table-body');
+            const emptyData = document.getElementById('empty-data');
+            const showingCount = document.getElementById('showing-count');
+
+            if (astronomyData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyData.classList.remove('hidden');
+                showingCount.textContent = '0';
+                return;
+            }
+
+            emptyData.classList.add('hidden');
+            showingCount.textContent = astronomyData.length;
+
+            tableBody.innerHTML = '';
+            astronomyData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/30 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${item.name}</td>
+                    <td class="px-4 py-3">${item.type}</td>
+                    <td class="px-4 py-3">${item.rightAscension}</td>
+                    <td class="px-4 py-3">${item.declination}</td>
+                    <td class="px-4 py-3">${item.magnitude}</td>
+                    <td class="px-4 py-3">${item.discoveryDate || '未知'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑" onclick="editData(${item.id})">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" title="删除" onclick="openModal('删除数据', '你确定要删除 ${item.name} 的数据吗？', 'delete', ${item.id})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 添加新数据
+        const dataForm = document.getElementById('data-form');
+        dataForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const type = document.getElementById('type').value;
+            const rightAscension = document.getElementById('right-ascension').value;
+            const declination = document.getElementById('declination').value;
+            const magnitude = parseFloat(document.getElementById('magnitude').value);
+            const discoveryDate = document.getElementById('discovery-date').value;
+            const description = document.getElementById('description').value;
+
+            const newData = {
+                id: Date.now(),
+                name,
+                type,
+                rightAscension,
+                declination,
+                magnitude,
+                discoveryDate,
+                description
+            };
+
+            astronomyData.push(newData);
+            renderDataTable();
+
+            // 重置表单
+            dataForm.reset();
+
+            // 显示成功消息
+            showNotification('数据添加成功！', 'success');
+        });
+
+        // 编辑数据
+        function editData(id) {
+            const data = astronomyData.find(item => item.id === id);
+            if (!data) return;
+
+            document.getElementById('name').value = data.name;
+            document.getElementById('type').value = data.type;
+            document.getElementById('right-ascension').value = data.rightAscension;
+            document.getElementById('declination').value = data.declination;
+            document.getElementById('magnitude').value = data.magnitude;
+            document.getElementById('discovery-date').value = data.discoveryDate || '';
+            document.getElementById('description').value = data.description || '';
+
+            // 滚动到表单
+            document.getElementById('add').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 删除数据
+        function deleteData(id) {
+            astronomyData = astronomyData.filter(item => item.id !== id);
+            renderDataTable();
+            showNotification('数据已删除！', 'error');
+        }
+
+        // 搜索功能
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+
+            if (!searchTerm) {
+                renderDataTable();
+                return;
+            }
+
+            const filteredData = astronomyData.filter(item => {
+                return item.name.toLowerCase().includes(searchTerm) ||
+                       item.type.toLowerCase().includes(searchTerm) ||
+                       item.rightAscension.toLowerCase().includes(searchTerm) ||
+                       item.declination.toLowerCase().includes(searchTerm);
+            });
+
+            const tableBody = document.getElementById('data-table-body');
+            const emptyData = document.getElementById('empty-data');
+            const showingCount = document.getElementById('showing-count');
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyData.classList.remove('hidden');
+                showingCount.textContent = '0';
+                return;
+            }
+
+            emptyData.classList.add('hidden');
+            showingCount.textContent = filteredData.length;
+
+            tableBody.innerHTML = '';
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-800 hover:bg-gray-800/30 transition-colors';
+                row.innerHTML = `
+                    <td class="px-4 py-3">${item.name}</td>
+                    <td class="px-4 py-3">${item.type}</td>
+                    <td class="px-4 py-3">${item.rightAscension}</td>
+                    <td class="px-4 py-3">${item.declination}</td>
+                    <td class="px-4 py-3">${item.magnitude}</td>
+                    <td class="px-4 py-3">${item.discoveryDate || '未知'}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex space-x-2">
+                            <button class="text-yellow-500 hover:text-yellow-600 transition-colors" title="编辑" onclick="editData(${item.id})">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="text-red-500 hover:text-red-600 transition-colors" title="删除" onclick="openModal('删除数据', '你确定要删除 ${item.name} 的数据吗？', 'delete', ${item.id})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        });
+
+        // 通知功能
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out translate-x-full z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-primary text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fa ${
+                        type === 'success' ? 'fa-check-circle' :
+                        type === 'error' ? 'fa-exclamation-circle' :
+                        'fa-info-circle'
+                    } mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            // 添加到页面
+            document.body.appendChild(notification);
+
+            // 显示通知
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 10);
+
+            // 自动关闭
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 500);
+            }, 3000);
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDataTable();
+        });
+    </script>
+</body>
+</html>
